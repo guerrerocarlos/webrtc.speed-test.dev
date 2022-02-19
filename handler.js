@@ -76,7 +76,7 @@ module.exports.process = async (events, ctx) => {
       let body = JSON.parse(event.body)
 
       if (body.event === "init") {
-        console.log("SEND peers!")
+        console.log("✋ SEND peers!")
         await sendMessage(event, { peerIds, myId: event.requestContext.connectionId })
         peerIds.push(event.requestContext.connectionId)
       }
@@ -87,13 +87,13 @@ module.exports.process = async (events, ctx) => {
       }
 
       if (body.event === "signal") {
-        console.log("SEND SINAL TO", body.toPeerId)
+        console.log("🐦 SEND SINAL TO", body.toPeerId)
         await sendMessage(event, { event: "signal", fromPeerId: event.requestContext.connectionId, data: body.data }, body.toPeerId)
       }
     }
 
     if (event.requestContext.eventType == "DISCONNECT") {
-      console.log("REMOVE", event.requestContext.connectionId)
+      console.log("💀 REMOVE", event.requestContext.connectionId)
 
       let reportManDown = []
       remove(peerIds, event.requestContext.connectionId)
