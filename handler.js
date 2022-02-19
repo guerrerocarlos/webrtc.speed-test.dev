@@ -76,24 +76,29 @@ module.exports.process = async (events, ctx) => {
 
   for (let event of records) {
     if (event.body) {
-      console.log("🚀 process", JSON.stringify(event, null, 2))
-      let body = JSON.parse(event.body)
-
-      if (body.event === "init") {
-        console.log("✋ SEND peers!")
-        await sendMessage(event, { peerIds, myId: event.requestContext.connectionId })
-        peerIds.push(event.requestContext.connectionId)
+      try {
+        console.log("🚀 process", JSON.stringify(event, null, 2))
+        let body = JSON.parse(event.body)
+  
+        if (body.event === "init") {
+          console.log("✋ SEND peers!")
+          await sendMessage(event, { peerIds, myId: event.requestContext.connectionId })
+          peerIds.push(event.requestContext.connectionId)
+        }
+  
+        if (body.event === "clean") {
+          peerIds = []
+          await sendMessage(event, { result: "cleaned" })
+        }
+  
+        if (body.event === "signal") {
+          console.log("🐦 SEND SINAL TO", body.toPeerId)
+          await sendMessage(event, { event: "signal", fromPeerId: event.requestContext.connectionId, data: body.data }, body.toPeerId)
+        }
+      } catch (err) {
+        console.log("ERR", err)
       }
-
-      if (body.event === "clean") {
-        peerIds = []
-        await sendMessage(event, { result: "cleaned" })
-      }
-
-      if (body.event === "signal") {
-        console.log("🐦 SEND SINAL TO", body.toPeerId)
-        await sendMessage(event, { event: "signal", fromPeerId: event.requestContext.connectionId, data: body.data }, body.toPeerId)
-      }
+      
     }
 
     if (event.requestContext.eventType == "DISCONNECT") {
