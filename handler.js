@@ -47,10 +47,13 @@ async function sendMessage(event, payload, connectionId) {
     Data: JSON.stringify(payload),
   }
   console.log("postToConnection", data)
-
-  const result = await apigatewaymanagementapis[domain + stage].postToConnection(
-    data).promise()
-  console.log("senderResult", result)
+  try {
+    const result = await apigatewaymanagementapis[domain + stage].postToConnection(
+      data).promise()
+      console.log("🟢", result)
+  } catch (err) {
+    console.log('🟠', err)
+  }
 }
 
 let peerIds = []
