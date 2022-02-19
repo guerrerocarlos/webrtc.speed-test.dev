@@ -12,8 +12,8 @@ env:
   COMMIT_SHA: "${{ github.sha }}"
   COMMIT_URL: "${{ github.event.head_commit.url }}"
   GIT_REF: "${{ github.ref }}"
-  PROJECT_FOLDER: peerNode
-  CACHE_FOLDER: peerNode/yarn.lock
+  PROJECT_FOLDER: "."
+  CACHE_FOLDER: yarn.lock
 
 jobs:
   deploy:
