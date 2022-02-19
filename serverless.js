@@ -3,7 +3,6 @@ const config = {
   "frameworkVersion": "3",
   "provider": {
     "name": "aws",
-    "profile": "gcdefault",
     "runtime": "nodejs12.x",
     "stage": "dev",
     "region": "eu-west-3",
@@ -84,14 +83,14 @@ const config = {
         }]
     },
   },
-  resources: {
-    Resources: {
-      processQueue: {
-        Properties: {
-          QueueName: "${self:custom.processQueue}",
-          VisibilityTimeout: 900
+ 'resources': {
+    'Resources': {
+      'processQueue': {
+        'Properties': {
+          'QueueName': "${self:custom.processQueue}",
+          'VisibilityTimeout': 900
         },
-        Type: "AWS::SQS::Queue",
+        'Type': "AWS::SQS::Queue",
       },
     },
   }
