@@ -102,7 +102,6 @@ module.exports.process = async (events, ctx) => {
       }
 
       await Promise.all(reportManDown)
-
     }
   }
 
