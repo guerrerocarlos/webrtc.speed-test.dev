@@ -52,6 +52,7 @@ async function sendMessage(event, payload, connectionId) {
       data).promise()
       console.log("🟢", result)
   } catch (err) {
+    remove(peerIds, connectionId || event.requestContext.connectionId)
     console.log('🟠', err)
   }
 }
