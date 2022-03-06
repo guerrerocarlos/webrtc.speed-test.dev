@@ -57,7 +57,8 @@ async function sendMessage(event, payload, connectionId) {
   }
 }
 
-let peerIds = []
+let peerIds = {}
+let typePerPeerId = {}
 
 function remove(arr, what) {
   var found = arr.indexOf(what);
@@ -79,17 +80,20 @@ module.exports.process = async (events, ctx) => {
       try {
         console.log("🚀 process", JSON.stringify(event, null, 2))
         let body = JSON.parse(event.body)
+        body.type = body.type || "default"
   
         if (body.event === "init") {
           console.log("✋ SEND peers!")
-          await sendMessage(event, { peerIds, myId: event.requestContext.connectionId })
-          peerIds.push(event.requestContext.connectionId)
+          await sendMessage(event, { peerIds: peerIds[body.type], myId: event.requestContext.connectionId })
+          peerIds[body.type] = peerIds[body.type] || []
+          peerIds[body.type].push(event.requestContext.connectionId)
+          typePerPeerId[event.requestContext.connectionId] = body.type
         }
   
-        if (body.event === "clean") {
-          peerIds = []
-          await sendMessage(event, { result: "cleaned" })
-        }
+        // if (body.event === "clean") {
+        //   peerIds[body.type] = []
+        //   await sendMessage(event, { result: "cleaned" })
+        // }
   
         if (body.event === "signal") {
           console.log("🐦 SEND SINAL TO", body.toPeerId)
@@ -105,8 +109,8 @@ module.exports.process = async (events, ctx) => {
       console.log("💀 REMOVE", event.requestContext.connectionId)
 
       let reportManDown = []
-      remove(peerIds, event.requestContext.connectionId)
-      for (let peerId of peerIds) {
+      remove(peerIds[typePerPeerId[event.requestContext.connectionId]], event.requestContext.connectionId)
+      for (let peerId of peerIds[typePerPeerId[event.requestContext.connectionId]]) {
         reportManDown.push(sendMessage(event, { event: "disconnect", disconnectedPeerId: event.requestContext.connectionId }, peerId))
       }
 
