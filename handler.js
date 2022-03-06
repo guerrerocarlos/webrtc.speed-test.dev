@@ -50,7 +50,7 @@ async function sendMessage(event, payload, connectionId) {
   try {
     const result = await apigatewaymanagementapis[domain + stage].postToConnection(
       data).promise()
-      console.log("🟢", result)
+    console.log("🟢", result)
   } catch (err) {
     remove(peerIds, connectionId || event.requestContext.connectionId)
     console.log('🟠', err)
@@ -64,8 +64,8 @@ function remove(arr, what) {
   var found = arr.indexOf(what);
 
   while (found !== -1) {
-      arr.splice(found, 1);
-      found = arr.indexOf(what);
+    arr.splice(found, 1);
+    found = arr.indexOf(what);
   }
 }
 
@@ -81,7 +81,7 @@ module.exports.process = async (events, ctx) => {
         console.log("🚀 process", JSON.stringify(event, null, 2))
         let body = JSON.parse(event.body)
         body.type = body.type || "default"
-  
+
         if (body.event === "init") {
           console.log("✋ SEND peers!")
           await sendMessage(event, { peerIds: peerIds[body.type], myId: event.requestContext.connectionId })
@@ -89,12 +89,12 @@ module.exports.process = async (events, ctx) => {
           peerIds[body.type].push(event.requestContext.connectionId)
           typePerPeerId[event.requestContext.connectionId] = body.type
         }
-  
+
         // if (body.event === "clean") {
         //   peerIds[body.type] = []
         //   await sendMessage(event, { result: "cleaned" })
         // }
-  
+
         if (body.event === "signal") {
           console.log("🐦 SEND SINAL TO", body.toPeerId)
           await sendMessage(event, { event: "signal", fromPeerId: event.requestContext.connectionId, data: body.data }, body.toPeerId)
@@ -102,14 +102,21 @@ module.exports.process = async (events, ctx) => {
       } catch (err) {
         console.log("ERR", err)
       }
-      
+
     }
 
     if (event.requestContext.eventType == "DISCONNECT") {
       console.log("💀 REMOVE", event.requestContext.connectionId)
 
       let reportManDown = []
-      remove(peerIds[typePerPeerId[event.requestContext.connectionId]], event.requestContext.connectionId)
+      try {
+        remove(peerIds[typePerPeerId[event.requestContext.connectionId]], event.requestContext.connectionId)
+      } catch (err) {
+        console.log("peerIds", peerIds)
+        console.log("typePerPeerId", typePerPeerId)
+        console.log("connectionId", event.requestContext.connectionId)
+        console.log(err)
+      }
       for (let peerId of peerIds[typePerPeerId[event.requestContext.connectionId]]) {
         reportManDown.push(sendMessage(event, { event: "disconnect", disconnectedPeerId: event.requestContext.connectionId }, peerId))
       }
